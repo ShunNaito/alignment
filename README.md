@@ -7,3 +7,5 @@
 ## Requirement
 
 MeCab
+
+usrdic.dic
