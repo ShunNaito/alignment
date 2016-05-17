@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<!-- 実行方法
+①ファイルを保存しているディレクトリで
+python -m SimpleHTTPServer 8888 & 
+
+②ブラウザー立ち上げて
+http://localhost:8888/(以降ファイルのアドレス)
+-->
+
+<style>
+ 
+    body {
+        font: 8px sans-serif;
+    }
+
+    .axis path,
+    .axis line {
+        fill: none;
+        stroke: #000;
+        shape-rendering: crispEdges;
+    }
+ 
+    .x.axis path {
+        display: black;
+    }
+ 
+    .line {
+        fill: none;
+        stroke: green;
+        stroke-width: 8px;
+    }
+
+    .line2 {
+        fill: none;
+        stroke: red;
+        stroke-width: 10px;
+    }
+ 
+</style>
+<body>
+<h1><center>円ドル相場の推移</center></h1>
+<script src="http://d3js.org/d3.v3.js"></script>
+<script>
+ 
+    var margin = {top: 20, right: 20, bottom: 30, left: 50},
+            width = window.innerWidth * 0.9,
+            height = window.innerHeight * 0.8;
+ 
+    var parseDate = d3.time.format("%Y-%m-%d").parse;
+ 
+    // スケールと出力レンジの定義
+    var x = d3.time.scale()
+            .range([0, width]);
+ 
+    var y = d3.scale.linear()
+            .range([height , 0]);
+ 
+    // 軸の定義
+    var xAxis = d3.svg.axis()
+            .scale(x)
+            .orient("bottom");
+ 
+    var yAxis = d3.svg.axis()
+            .scale(y)
+            .orient("left");
+ 
+    // 線の定義
+    var line = d3.svg.line()
+            .x(function(d) { return x(d.date); })
+            .y(function(d) { return y(d.close); });
+
+    var line_result = d3.svg.line()
+            .x(function(d) { return x(d.date); })
+            .y(function(d) { return y(d.close); });
+ 
+    // svgの定義
+    var svg = d3.select("body").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")"); 
+ 
+    // データを読み込む
+    d3.csv("CSVdata.csv", function(error, data){
+
+        // データをフォーマット
+        data.forEach(function(d) {
+            d.date = parseDate(d.date);
+            d.close = + d.close;
+        });
+
+       
+        // データを入力ドメインとして設定
+        // 同時にextentで目盛りの単位が適切になるようにする
+        var closeMax = d3.max( data, function(d) { return d.close; }); //y軸の最大値抽出
+
+        x.domain(d3.extent(data, function(d) { return d.date; }));
+        y.domain([0, closeMax*1.2]); //y軸の最小値は0で統一
+        y.domain(d3.extent(data, function(d) { return d.close; }));
+
+        // x軸をsvgに表示
+        svg.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + height + ")")
+                .call(xAxis);
+ 
+        // y軸をsvgに表示
+        svg.append("g")
+                .attr("class", "y axis")
+                .call(yAxis)
+                .append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("y", 6)
+                .attr("dy", ".71em")
+                .style("text-anchor", "end")
+                .text("円/ドル"); //lostwoorkは失業者数 (%)
+ 
+        // path要素をsvgに表示し、折れ線グラフを設定
+        svg.append("path")
+                .datum(data)
+                .attr("class", "line")
+                .attr("d", line);
+
+        });
+
+        d3.csv("CSVdata_result.csv", function(error, data2) {
+
+        // データをフォーマット
+        data2.forEach(function(d) {
+            d.date = parseDate(d.date);
+            d.close = + d.close;
+        });
+
+        svg.append("path")
+                .datum(data2)
+                .attr("class", "line2")
+                .attr("d", line_result);
+
+
+});
+ 
+</script>
