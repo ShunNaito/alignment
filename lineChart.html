@@ -42,7 +42,24 @@ body {
 <body>
 <h1><center>円ドル相場の推移</center></h1>
 <script src="http://d3js.org/d3.v3.js"></script>
+<script type="text/javascript" src="jquery-1.5.2.min.js"></script>
 <script>
+
+window.onload = function() {
+  send();
+}
+
+function send() {
+    var s = document.createElement('script');
+    s.src = '/cgi-bin/main.py';
+    document.body.appendChild(s);
+    console.log(s);
+    return false;
+}
+
+function callback(json) {
+    $("#result").html("答えは "+json.answer);
+}
 
 var margin = {top: 20, right: 20, bottom: 30, left: 50},
     width = window.innerWidth * 0.9,
@@ -137,3 +154,6 @@ d3.csv("CSVdata_result.csv", function(error, data2) {
 });
 
 </script>
+<div id="result">計算結果</div>
+</body>
+</html>

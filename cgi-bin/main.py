@@ -1,11 +1,16 @@
 #!/usr/bin/python
 #coding:utf-8
 
-import csv, sys, codecs, MeCab
+import os, cgi, csv, sys, codecs, MeCab
+
+if 'QUERY_STRING' in os.environ:
+    query = cgi.parse_qs(os.environ['QUERY_STRING'])
+else:
+    query = {}
 
 #時系列データの日付が飛んでる場合はcsvの方で補完しておく
 
-file_name = '../HTML/CSVdata'
+file_name = './CSVdata'
 
 date = [] #助数詞のみを格納(中旬,初頭なども格納)
 num = [] #数字部分を格納(□旬='-1',初頭='-2'を格納)
@@ -66,7 +71,7 @@ node = mecab.parseToNode(text).next #nodeを先頭に戻す
 
 #グラフプリミティブの抽出
 #グラフプリミティブの語はテキストファイルに保存して管理している。前半ではそれを読み込み変数に格納している
-p_graphword = "" #グラフプリミティブを指す単語を格納	
+p_graphword = "" #グラフプリミティブを指す単語を格納
 
 josho = []
 kako = []
@@ -94,13 +99,13 @@ dataReader = csv.reader(f)
 for a in dataReader: #配列dataにファイルデータ格納
 	if a != ["date", "close"]: #一行目のdata,closeは描写用なので除く
 		data_original.append(a)
-		
+
 for i in range(0, len(data_original)): #データを処理できる形に変更
 	data_original[i][1] = float(data_original[i][1]) #数値をfloat型に変換
 
 	#print data[i] #配列表示(テスト用)
 	#データ例 ['8-01',100.0]
-	
+
 	#日付を整数表記にする
 	date = data_original[i][0]
 	date = date.replace('-','') #日付のハイフン削除
@@ -156,7 +161,7 @@ for start_data in range(0, len(data)-1): #時系列データの中から任意�
 	for end_data in range(start_data+1, len(data)): #任意の2点のうち、片方でも補完した時系列データなら一致度は測らない
 
 		#上昇の場合
-		if p_hendo > 0: 
+		if p_hendo > 0:
 			#任意の2点が2点間で始点=最小値、終点=最大値を取っているか
 			maxVal = -sys.maxint #任意の2点内での最大値格納
 			maxDay = 0 #最大値を記録した日付(後でstart_dataと同じ日付か比較)
@@ -166,7 +171,7 @@ for start_data in range(0, len(data)-1): #時系列データの中から任意�
 				if maxVal < data[i][1]:
 					maxVal = data[i][1]
 					maxDay = i
-				
+
 				if minVal > data[i][1]:
 					minVal = data[i][1]
 					minDay = i
@@ -175,7 +180,7 @@ for start_data in range(0, len(data)-1): #時系列データの中から任意�
 				max_min = 1
 			else:
 				max_min = 0
-				
+
 
 			#変動一致度の1つ、任意の二点間で変動の曖昧表現を満たす部分の割合を測る
 			sum_kukan = 0
@@ -191,7 +196,7 @@ for start_data in range(0, len(data)-1): #時系列データの中から任意�
 
 
 		#下降の場合
-		elif p_hendo < 0: 
+		elif p_hendo < 0:
 			#任意の2点が2点間で始点=最小値、終点=最大値を取っているか
 			maxVal = -sys.maxint #任意の2点内での最大値格納
 			maxDay = 0 #最大値を記録した日付(後でstart_dataと同じ日付か比較)
@@ -201,7 +206,7 @@ for start_data in range(0, len(data)-1): #時系列データの中から任意�
 				if maxVal < data[i][1]:
 					maxVal = data[i][1]
 					maxDay = i
-				
+
 				if minVal > data[i][1]:
 					minVal = data[i][1]
 					minDay = i
@@ -362,7 +367,7 @@ for start_data in range(0, len(data)-1): #時系列データの中から任意�
 			best_rate = rate
 			best_start_data = start_data
 			best_end_data = end_data
-			
+
 
 		elif second_rate < rate:
 			fifth_rate = fourth_rate
@@ -402,12 +407,18 @@ for start_data in range(0, len(data)-1): #時系列データの中から任意�
 			fifth_start_data = start_data
 			fifth_end_data = end_data
 
+c = "hoge";
+
+print "Content-Type:text/javascript"
+print
+print "callback({'answer':'%d-%d'});"%(data[best_start_data][0],data[best_end_data][0])
+
 #一致度が高い上位5件の期間を表示
-print "best:%d-%d(%f)"%(data[best_start_data][0],data[best_end_data][0],best_rate)
-print "second:%d-%d(%f)"%(data[second_start_data][0],data[second_end_data][0],second_rate)
-print "third:%d-%d(%f)"%(data[third_start_data][0],data[third_end_data][0],third_rate)
-print "fourth:%d-%d(%f)"%(data[fourth_start_data][0],data[fourth_end_data][0],fourth_rate)
-print "fifth:%d-%d(%f)"%(data[fifth_start_data][0],data[fifth_end_data][0],fifth_rate)
+# print "best:%d-%d(%f)"%(data[best_start_data][0],data[best_end_data][0],best_rate)
+# print "second:%d-%d(%f)"%(data[second_start_data][0],data[second_end_data][0],second_rate)
+# print "third:%d-%d(%f)"%(data[third_start_data][0],data[third_end_data][0],third_rate)
+# print "fourth:%d-%d(%f)"%(data[fourth_start_data][0],data[fourth_end_data][0],fourth_rate)
+# print "fifth:%d-%d(%f)"%(data[fifth_start_data][0],data[fifth_end_data][0],fifth_rate)
 
 #一致度が最高の期間をcsvへの書き出し
 f = open(file_name + '_result.csv','w') #ファイルが無ければ作る、の'a'を指定します
@@ -425,6 +436,7 @@ for i in range(0, len(data_original)): #入力に用いたcsvデータをもと�
 	if write_flag == True:
 		for j in range(0, 2):
 			write_data.append(data_original[i][j])
+		# print write_data;
 		csvWriter.writerow(write_data)
 
 	if i == best_end_data: #データが終了日になったら書き出し終了
@@ -432,4 +444,4 @@ for i in range(0, len(data_original)): #入力に用いたcsvデータをもと�
 
 f.close
 
-print("書き出しが正常に完了しました")
+# print("書き出しが正常に完了しました")
