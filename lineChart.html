@@ -45,9 +45,7 @@ body {
 <script type="text/javascript" src="jquery-1.5.2.min.js"></script>
 <script>
 
-window.onload = function() {
-  send();
-}
+send();
 
 function send() {
     var s = document.createElement('script');
@@ -138,19 +136,6 @@ d3.csv("CSVdata.csv", function(error, data){
             .datum(data)
             .attr("class", "line")
             .attr("d", line);
-});
-
-d3.csv("CSVdata_result.csv", function(error, data2) {
-    // データをフォーマット
-    data2.forEach(function(d) {
-        d.date = parseDate(d.date);
-        d.close = + d.close;
-    });
-
-    svg.append("path")
-            .datum(data2)
-            .attr("class", "line2")
-            .attr("d", line_result);
 });
 
 </script>
