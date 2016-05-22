@@ -57,6 +57,25 @@ function send() {
 
 function callback(json) {
     $("#result").html("答えは "+json.answer);
+    json.answer = parseDateYmd(json.answer);
+    console.log(json.answer);
+
+    svg.append("line")
+            .datum(json.answer)
+            .attr("x1", function(d) {
+                return x(json.answer);
+            })
+            .attr("y1", function(d) {
+                return height;
+            })
+            .attr("x2", function(d) {
+                return x(json.answer);
+            })
+            .attr("y2", function(d) {
+                return 0;
+            })
+            .attr("stroke", 'red')
+            .attr("opacity", '0.9');
 }
 
 var margin = {top: 20, right: 20, bottom: 30, left: 50},
@@ -64,6 +83,7 @@ var margin = {top: 20, right: 20, bottom: 30, left: 50},
     height = window.innerHeight * 0.8;
 
 var parseDate = d3.time.format("%Y-%m-%d").parse;
+var parseDateYmd = d3.time.format("%Y%m%d").parse;
 
 // スケールと出力レンジの定義
 var x = d3.time.scale()
