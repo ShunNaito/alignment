@@ -407,11 +407,10 @@ for start_data in range(0, len(data)-1): #時系列データの中から任意�
 			fifth_start_data = start_data
 			fifth_end_data = end_data
 
-c = "hoge";
 
 print "Content-Type:text/javascript"
 print
-print "callback({'answer':'%d-%d'});"%(data[best_start_data][0],data[best_end_data][0])
+print "callback({'answer':'%d'});"%(data[best_start_data][0])
 
 #一致度が高い上位5件の期間を表示
 # print "best:%d-%d(%f)"%(data[best_start_data][0],data[best_end_data][0],best_rate)
