@@ -55,27 +55,33 @@ function send() {
     return false;
 }
 
-function callback(json) {
-    $("#result").html("答えは "+json.answer);
-    json.answer = parseDateYmd(json.answer);
-    console.log(json.answer);
+function callback(point) {
+    console.log(point);
+    for(var key in point) {
+      if(point.hasOwnProperty(key)) {
+        point[key] = parseDateYmd(point[key]);
+      }
+    }
 
-    svg.append("line")
-            .datum(json.answer)
-            .attr("x1", function(d) {
-                return x(json.answer);
+    svg.append("rect")
+            .datum(point)
+            .attr("x", function(d) {
+                console.log(x(point.startPoint));
+                return x(point.startPoint);
             })
-            .attr("y1", function(d) {
-                return height;
-            })
-            .attr("x2", function(d) {
-                return x(json.answer);
-            })
-            .attr("y2", function(d) {
+            .attr("y", function(d) {
                 return 0;
             })
+            .attr("width", function(d) {
+                console.log(x(point.endPoint) - x(point.startPoint));
+                return x(point.endPoint) - x(point.startPoint);
+            })
+            .attr("height", function(d) {
+                return height;
+            })
             .attr("stroke", 'red')
-            .attr("opacity", '0.9');
+            .attr("fill", 'red')
+            .attr("opacity", '0.5');
 }
 
 var margin = {top: 20, right: 20, bottom: 30, left: 50},
