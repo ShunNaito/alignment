@@ -45,7 +45,9 @@ body {
 <script type="text/javascript" src="jquery-1.5.2.min.js"></script>
 <script>
 
-send();
+window.onload = function() {
+  send();
+}
 
 function send() {
     var s = document.createElement('script');
